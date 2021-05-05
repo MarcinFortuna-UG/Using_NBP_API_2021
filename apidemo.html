@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Using API</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <style>
+        thead {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>API use demonstration</h1>
+    <h2>Currency exchange</h2>
+    <p>Enter a currency:</p>
+    <form id="currencyForm">
+        <input type="text" id="currencyBox">
+        <input type="submit">
+    </form>
+    <ul id="currencyList"></ul>
+    <hr>
+    <button id="whole_table">Show whole NBP table</button>
+    <table>
+        <thead>
+            <tr>
+                <td>Waluta</td>
+                <td>Kod</td>
+                <td>Sprzedaż</td>
+                <td>Skup</td>
+            </tr>
+        </thead>
+        <tbody id="table_body">
+        </tbody>
+    </table>
+
+    <script>
+        const currencyForm = document.getElementById("currencyForm");
+        const currencyBox = document.getElementById("currencyBox");
+        const currencyList = document.getElementById("currencyList");
+        let curr;
+        currencyForm.onsubmit = function (event) {
+            event.preventDefault();
+            curr = currencyBox.value.toUpperCase();
+            let url = "http://api.nbp.pl/api/exchangerates/rates/A/" + curr + "?format=json";
+
+            fetch(url)
+                .then(response => response.json())
+                .then(response => {
+                    currencyList.innerHTML = "";
+                    mid = response["rates"][0]["mid"]
+                    let li = document.createElement("li");
+                    li.appendChild(document.createTextNode(mid));
+                    currencyList.appendChild(li);
+                })
+        }
+
+        const whole_table_button = document.getElementById("whole_table");
+        const table_body = document.getElementById("table_body");
+        whole_table_button.onclick = function (event) {
+            event.preventDefault();
+            fetch("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
+                .then(response => response.json())
+                .then(response => {
+                    rates = response[0]["rates"]
+                    // console.log(rates);
+                    table_body.innerHTML = "";
+                    for (let i = 0; i < rates.length; i++) {
+                        console.log(rates[i]);
+                        let tr = document.createElement("tr");
+
+                        // Solution 1:
+                        // let td1 = document.createElement("td");
+                        // td1.appendChild(document.createTextNode(rates[i]["currency"]));
+                        // let td2 = document.createElement("td");
+                        // td2.appendChild(document.createTextNode(rates[i]["code"]));
+                        // let td3 = document.createElement("td");
+                        // td3.appendChild(document.createTextNode(rates[i]["ask"]));
+                        // let td4 = document.createElement("td");
+                        // td4.appendChild(document.createTextNode(rates[i]["bid"]));
+                        // tr.appendChild(td1);
+                        // tr.appendChild(td2);
+                        // tr.appendChild(td3);
+                        // tr.appendChild(td4);
+
+                        // Solution 2:
+                        let innerContent = `<td>${rates[i]["currency"]}</td><td>${rates[i]["code"]}</td><td>${rates[i]["ask"]}</td><td>${rates[i]["bid"]}</td>`
+                        tr.innerHTML = innerContent;
+                        table_body.appendChild(tr);
+                    }
+                })
+        }
+    </script>
+</body>
